@@ -1,0 +1,17 @@
+{
+  "name": "Luxury Moon",
+  "short_name": "Luxury Moon",
+  "description": "Tu club Luxury Moon: carta, sellos, premios, la ruleta y Luni.",
+  "lang": "es-PE",
+  "start_url": "./?app=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08070A",
+  "theme_color": "#08070A",
+  "icons": [
+    { "src": "icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

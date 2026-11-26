@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Luxury Moon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08070A">
+<meta name="description" content="Tu club Luxury Moon: carta, sellos, premios, la ruleta y Luni.">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Luxury Moon">
+<meta property="og:title" content="Luxury Moon">
+<meta property="og:description" content="Únete gratis al club: cada cóctel suma.">
+<meta property="og:image" content="icono-512.png">
+<style>
+  html, body { margin: 0; height: 100%; background: #08070A; overflow: hidden; }
+  #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #08070A; }
+  /* Pantalla de carga: aparece al instante mientras Google prepara la app */
+  #carga { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+           background: radial-gradient(120% 80% at 50% 38%, #1a1520 0%, #0a090d 55%, #050506 100%); transition: opacity .5s ease; z-index: 2; }
+  #carga.fuera { opacity: 0; pointer-events: none; }
+  #carga img { width: 132px; height: 132px; border-radius: 30px; box-shadow: 0 0 60px rgba(232,204,142,.25); animation: late 1.6s ease-in-out infinite; }
+  #carga p { margin: 0; font: 500 12px/1 system-ui, sans-serif; letter-spacing: .3em; color: #C9A961; }
+  #carga .barra { width: 150px; height: 2px; border-radius: 2px; background: rgba(201,169,97,.18); overflow: hidden; }
+  #carga .barra i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, transparent, #E8CC8E, transparent); animation: corre 1.2s ease-in-out infinite; }
+  @keyframes corre { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+  @keyframes late { 50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(232,204,142,.4); } }
+  /* Invitación a instalar */
+  #instalar { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 3; display: none; align-items: center; gap: 12px;
+              background: #15131a; border: 1px solid rgba(201,169,97,.6); border-radius: 18px; padding: 12px 12px 12px 14px; box-shadow: 0 18px 40px rgba(0,0,0,.6);
+              font: 14px/1.35 system-ui, sans-serif; color: #F6EEDE; }
+  #instalar.ver { display: flex; animation: sube .45s cubic-bezier(.2,.8,.2,1); }
+  #instalar img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
+  #instalar div { flex: 1; min-width: 0; }
+  #instalar b { display: block; }
+  #instalar span { color: #B9B2A5; font-size: 12.5px; }
+  #instalar button { flex: none; min-height: 44px; border: 0; border-radius: 99px; font: 700 13px system-ui, sans-serif; cursor: pointer; }
+  #btnInstalar { padding: 0 16px; background: linear-gradient(135deg, #E8CC8E, #A8833A); color: #111; }
+  #btnNo { width: 44px; background: transparent; color: #8E8A82; font-size: 20px !important; }
+  @keyframes sube { from { transform: translateY(30px); opacity: 0; } }
+  #error { display: none; position: fixed; inset: 0; z-index: 4; align-items: center; justify-content: center; text-align: center; padding: 24px;
+           font: 15px/1.5 system-ui, sans-serif; color: #F6EEDE; background: #08070A; }
+  #error a { color: #E8CC8E; }
+  @media (prefers-reduced-motion: reduce) { #carga img { animation: none; } }
+</style>
+</head>
+<body>
+<div id="carga"><img src="icono-512.png" alt="Luxury Moon"><p id="txtCarga">ABRIENDO EL BAR</p><div class="barra"><i></i></div></div>
+<iframe id="app" title="Luxury Moon" allow="clipboard-write; web-share; vibrate"></iframe>
+<div id="instalar" role="dialog" aria-label="Instalar Luxury Moon">
+  <img src="icono-192.png" alt="">
+  <div><b>Instala Luxury Moon</b><span id="txtInstalar">Tenla en tu pantalla de inicio, como una app.</span></div>
+  <button type="button" id="btnInstalar">INSTALAR</button>
+  <button type="button" id="btnNo" aria-label="Ahora no">×</button>
+</div>
+<div id="error"><p>⚠️ Falta configurar el link de la app.<br>Abre <b>index.html</b> y pega tu link de Apps Script (el que termina en <b>/exec</b>) en la línea <b>APP</b>.</p></div>
+<script>
+  /* ====== ÚNICO CAMBIO: pega aquí tu link de Apps Script (Implementar → Gestionar implementaciones) ====== */
+  const APP = 'const APP = 'https://script.google.com/macros/s/.../exec';
+  /* ======================================================================================================== */
+
+  (function () {
+    const frame = document.getElementById('app'), carga = document.getElementById('carga');
+    // Acepta el link aunque tenga espacios, ?parámetros o termine en /dev
+    const m = String(APP).trim().match(/https:\/\/script\.google(?:usercontent)?\.com\/[^\s'"?#]*?\/(?:exec|dev)/);
+    if (!m) {
+      const e = document.getElementById('error'); e.style.display = 'flex';
+      e.querySelector('p').insertAdjacentHTML('beforeend', '<br><br><small style="color:#8E8A82">Ahora dice: <code>' + String(APP).replace(/[<>&]/g, '') + '</code></small>');
+      carga.classList.add('fuera'); return;
+    }
+    const LINK = m[0];
+    // Pasa los parámetros del link (?ref=, ?id=, ?tab=, ?v=) a la app
+    const q = new URLSearchParams(location.search); q.delete('app');
+    frame.src = LINK + (q.toString() ? '?' + q.toString() : '');
+    let listo = false;
+    const quitar = () => { if (listo) return; listo = true; setTimeout(() => carga.classList.add('fuera'), 250); };
+    frame.addEventListener('load', quitar);
+    setTimeout(quitar, 9000);
+    const frases = ['ABRIENDO EL BAR', 'PREPARANDO TU MESA', 'ENFRIANDO LOS VASOS', 'YA CASI 🌙'];
+    let fi = 0; const tf = setInterval(() => { if (listo) return clearInterval(tf); fi = Math.min(fi + 1, frases.length - 1); document.getElementById('txtCarga').textContent = frases[fi]; }, 1600);
+
+    // Funciona sin conexión la cáscara y permite instalar
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+    // Invitación a instalar (solo si no está instalada y no la rechazó hace poco)
+    const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    let noMolestar = 0; try { noMolestar = Number(localStorage.getItem('lm_no_instalar')) || 0; } catch (e) {}
+    const puedePreguntar = !instalada && Date.now() - noMolestar > 7 * 864e5;
+    const caja = document.getElementById('instalar'), btn = document.getElementById('btnInstalar');
+    let aviso = null;
+    const mostrar = () => { if (puedePreguntar) setTimeout(() => caja.classList.add('ver'), 4500); };
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); aviso = e; mostrar(); });
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    if (ios) { document.getElementById('txtInstalar').innerHTML = 'Toca <b>Compartir</b> <span aria-hidden="true">⬆︎</span> y luego <b>Agregar a inicio</b>.'; btn.textContent = 'OK'; mostrar(); }
+    btn.addEventListener('click', async () => {
+      caja.classList.remove('ver');
+      if (aviso) { aviso.prompt(); try { await aviso.userChoice; } catch (e) {} aviso = null; }
+      else try { localStorage.setItem('lm_no_instalar', String(Date.now())); } catch (e) {}
+    });
+    document.getElementById('btnNo').addEventListener('click', () => { caja.classList.remove('ver'); try { localStorage.setItem('lm_no_instalar', String(Date.now())); } catch (e) {} });
+    window.addEventListener('appinstalled', () => caja.classList.remove('ver'));
+  })();
+</script>
+</body>
+</html>
