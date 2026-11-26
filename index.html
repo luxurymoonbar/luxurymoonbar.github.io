@@ -29,6 +29,7 @@
   #carga.fuera { opacity: 0; pointer-events: none; }
   #carga img { width: 132px; height: 132px; border-radius: 30px; box-shadow: 0 0 60px rgba(232,204,142,.25); animation: late 1.6s ease-in-out infinite; }
   #carga p { margin: 0; font: 500 12px/1 system-ui, sans-serif; letter-spacing: .3em; color: #C9A961; }
+  #directo { display: none; margin-top: 10px; color: #E8CC8E; font: 600 14px system-ui, sans-serif; padding: 12px 18px; border: 1px solid rgba(201,169,97,.5); border-radius: 99px; text-decoration: none; }
   #carga .barra { width: 150px; height: 2px; border-radius: 2px; background: rgba(201,169,97,.18); overflow: hidden; }
   #carga .barra i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, transparent, #E8CC8E, transparent); animation: corre 1.2s ease-in-out infinite; }
   @keyframes corre { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
@@ -53,7 +54,7 @@
 </style>
 </head>
 <body>
-<div id="carga"><img src="icono-512.png" alt="Luxury Moon"><p id="txtCarga">ABRIENDO EL BAR</p><div class="barra"><i></i></div></div>
+<div id="carga"><img src="icono-512.png" alt="Luxury Moon"><p id="txtCarga">ABRIENDO EL BAR</p><div class="barra"><i></i></div><a id="directo" href="#" target="_top">¿Tarda mucho? Abrir directo</a></div>
 <iframe id="app" title="Luxury Moon" allow="clipboard-write; web-share; vibrate"></iframe>
 <div id="instalar" role="dialog" aria-label="Instalar Luxury Moon">
   <img src="icono-192.png" alt="">
@@ -64,7 +65,7 @@
 <div id="error"><p>⚠️ Falta configurar el link de la app.<br>Abre <b>index.html</b> y pega tu link de Apps Script (el que termina en <b>/exec</b>) en la línea <b>APP</b>.</p></div>
 <script>
   /* ====== ÚNICO CAMBIO: pega aquí tu link de Apps Script (Implementar → Gestionar implementaciones) ====== */
-  const APP = 'const APP = 'https://script.google.com/macros/s/.../exec';
+  const APP = 'https://script.google.com/macros/s/AKfycbzVRJiVBtvetM7O66kUizqp-dVeUsl0GvK_RHFYuwMZpnuP2huNnxeGJPQxFr4Agqngxg/exec';
   /* ======================================================================================================== */
 
   (function () {
@@ -82,8 +83,11 @@
     frame.src = LINK + (q.toString() ? '?' + q.toString() : '');
     let listo = false;
     const quitar = () => { if (listo) return; listo = true; setTimeout(() => carga.classList.add('fuera'), 250); };
+    const directo = document.getElementById('directo');
+    directo.href = frame.src;
     frame.addEventListener('load', quitar);
-    setTimeout(quitar, 9000);
+    // Si Google no deja abrir la app aquí dentro, ofrece abrirla directo (nunca se queda trabada)
+    setTimeout(() => { if (!listo) directo.style.display = 'inline-block'; }, 7000);
     const frases = ['ABRIENDO EL BAR', 'PREPARANDO TU MESA', 'ENFRIANDO LOS VASOS', 'YA CASI 🌙'];
     let fi = 0; const tf = setInterval(() => { if (listo) return clearInterval(tf); fi = Math.min(fi + 1, frases.length - 1); document.getElementById('txtCarga').textContent = frases[fi]; }, 1600);
 
